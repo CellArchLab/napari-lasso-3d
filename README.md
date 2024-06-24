@@ -13,6 +13,39 @@
 
 This [napari] plugin was generated with [Cookiecutter] using [@napari]'s [cookiecutter-napari-plugin] template.
 
+
+## Lasso tool
+
+This repository currently contains 4 different methods for computing a 3D mask from a polygon:
+
+### Mask via rotation
+Steps:
+1. Rotate and project polygon to 2D and create a pixel mask
+2. Create a 3D mask by stacking the pixel mask along z
+3. Rotate 3D mask s.t. it is aligned with the original polygon
+
+### Mask via projection
+Steps:
+1. Project all points onto the hyperplane defined by the polygon
+2. Rotate all points and the polygon s.t. they are in a horizontal plane and remove z component
+3. Create a binary pixel mask of the polygon
+4. Check which point projections are within the polygon mask
+5. reshape mask to original tomogram size
+
+### Mask via mesh voxelization
+Steps:
+1. Move polygon along its normal in both directions until end of tomogram shape --> front & back polygons
+2. Define a surface by combining front & back polygons into a triangular mesh
+3. Voxelize the surface, giving the outline of the cone
+4. Fill holes to receive a filled cone
+
+### Mask via attaching slices
+Steps:
+1. Rotate and project polygon to 2D and generate a pixel mask (2D)
+2. Get indices of pixel mask and rotate them back to 3D space
+3. Do that for many pixel mask, varying the z-component --> will be moved into tomogram along the polygon normal
+4. Binary closing to get rid of holes from integer conversion
+
 <!--
 Don't miss the full getting started guide to set up your new package:
 https://github.com/napari/cookiecutter-napari-plugin#getting-started
@@ -23,7 +56,8 @@ https://napari.org/stable/plugins/index.html
 
 ## Installation
 
-You can install `lasso-3d` via [pip]:
+pip install .
+<!-- You can install `lasso-3d` via [pip]:
 
     pip install lasso-3d
 
@@ -31,7 +65,7 @@ You can install `lasso-3d` via [pip]:
 
 To install latest development version :
 
-    pip install git+https://github.com/LorenzLamm/lasso-3d.git
+    pip install git+https://github.com/LorenzLamm/lasso-3d.git -->
 
 
 ## Contributing
