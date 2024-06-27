@@ -6,32 +6,32 @@ visibility: public
 categories: ["Annotation", "Segmentation", "Acquisition"]
 contributions:
   commands:
-    - id: lasso-3d.get_reader
-      python_name: lasso_3d._reader:napari_get_reader
-      title: Open data with Lasso
-    - id: lasso-3d.make_container_widget
-      python_name: lasso_3d:ImageThreshold
-      title: Make threshold Container widget
-    - id: lasso-3d.make_magic_widget
-      python_name: lasso_3d:threshold_magic_widget
-      title: Make threshold magic widget
-    - id: lasso-3d.make_function_widget
-      python_name: lasso_3d:threshold_autogenerate_widget
-      title: Make threshold function widget
+    # - id: lasso-3d.get_reader
+    #   python_name: lasso_3d._reader:napari_get_reader
+    #   title: Open data with Lasso
+    # - id: lasso-3d.make_container_widget
+    #   python_name: lasso_3d:ImageThreshold
+    #   title: Make threshold Container widget
+    # - id: lasso-3d.make_magic_widget
+    #   python_name: lasso_3d:threshold_magic_widget
+    #   title: Make threshold magic widget
+    # - id: lasso-3d.make_function_widget
+    #   python_name: lasso_3d:threshold_autogenerate_widget
+    #   title: Make threshold function widget
     - id: lasso-3d.make_qwidget
-      python_name: lasso_3d:ExampleQWidget
-      title: Make example QWidget
-  readers:
-    - command: lasso-3d.get_reader
-      accepts_directories: false
-      filename_patterns: ['*.npy']
+      python_name: lasso_3d:Lasso3D
+      title: Open Lasso Widget
+  # readers:
+  #   - command: lasso-3d.get_reader
+  #     accepts_directories: false
+  #     filename_patterns: ['*.npy']
   widgets:
-    - command: lasso-3d.make_container_widget
-      display_name: Container Threshold
-    - command: lasso-3d.make_magic_widget
-      display_name: Magic Threshold
-    - command: lasso-3d.make_function_widget
-      autogenerate: true
-      display_name: Autogenerate Threshold
+    # - command: lasso-3d.make_container_widget
+    #   display_name: Container Threshold
+    # - command: lasso-3d.make_magic_widget
+    #   display_name: Magic Threshold
+    # - command: lasso-3d.make_function_widget
+    #   autogenerate: true
+    #   display_name: Autogenerate Threshold
     - command: lasso-3d.make_qwidget
-      display_name: Example QWidget
+      display_name: Lasso Widget
