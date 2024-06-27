@@ -142,7 +142,6 @@ def mask_via_extension(polygon_3d, tomo_shape):
             & (cur_coords < tomo_shape).all(axis=1)
         ]
         volume[cur_coords[:, 0], cur_coords[:, 1], cur_coords[:, 2]] = True
-
     # volume1 = binary_closing(volume1)
     volume = cropped_closing(volume)
     return volume
