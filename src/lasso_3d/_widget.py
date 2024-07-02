@@ -3,9 +3,17 @@ from typing import List
 import napari
 import numpy as np
 from magicgui import magicgui
+from membrain_seg.segmentation.dataloading.data_utils import store_tomogram
 from napari.layers.shapes._shapes_constants import Mode
 from napari.layers.shapes._shapes_mouse_bindings import add_path_polygon_lasso
-from qtpy.QtWidgets import QHBoxLayout, QPushButton, QVBoxLayout, QWidget
+from napari.utils.colormaps import colormap
+from qtpy.QtWidgets import (
+    QHBoxLayout,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
+from scipy.ndimage import label
 
 from lasso_3d.lasso_add_slices import mask_via_extension
 from lasso_3d.shapes_overwrites import redefine_shapelayer_functions
@@ -43,10 +51,49 @@ class Lasso3D(QWidget):
         )
         self.mask_seg_box.addWidget(self._layer_selection_widget_mask.native)
 
+        self.connected_components_box = QHBoxLayout()
+        self._layer_selection_widget_connected_components = magicgui(
+            self._connected_components,
+            mask_layer={"choices": self._get_valid_mask_layers},
+            remove_small_objects_size={"value": 100},
+            call_button="Connected Components",
+        )
+        self.connected_components_box.addWidget(
+            self._layer_selection_widget_connected_components.native
+        )
+
+        self.display_connected_components_box = QHBoxLayout()
+        self._layer_selection_widget_display_connected_components = magicgui(
+            self._display_connected_components,
+            components_layer={"choices": self._get_valid_image_layers},
+            component_number={"value": 1},
+            call_button="Display Connected Components",
+        )
+        self.display_connected_components_box.addWidget(
+            self._layer_selection_widget_display_connected_components.native
+        )
+
+        self.store_tomogram_box = QHBoxLayout()
+        self.store_tomogram_widget = magicgui(
+            self._store_tomogram,
+            image_layer={"choices": self._get_valid_image_layers},
+            store_component_number={"value": 1, "label": "Component Number"},
+            filename={
+                "widget_type": "FileEdit",
+                "mode": "d",
+                "label": "Folder Path",
+            },
+            call_button="Store Tomogram",
+        )
+        self.store_tomogram_box.addWidget(self.store_tomogram_widget.native)
+
         self.setLayout(QVBoxLayout())
         self.layout().addLayout(self.annotation_box)
         self.layout().addLayout(self.selection_box)
         self.layout().addLayout(self.mask_seg_box)
+        self.layout().addLayout(self.connected_components_box)
+        self.layout().addLayout(self.display_connected_components_box)
+        self.layout().addLayout(self.store_tomogram_box)
         # self.layout().addWidget(self._layer_selection_widget.native)
 
         viewer.layers.events.inserted.connect(self._on_layer_change)
@@ -64,6 +111,15 @@ class Lasso3D(QWidget):
         )
         self._layer_selection_widget_mask.mask_layer.choices = (
             self._get_valid_mask_layers(None)
+        )
+        self._layer_selection_widget_connected_components.mask_layer.choices = self._get_valid_mask_layers(
+            None
+        )
+        self._layer_selection_widget_display_connected_components.components_layer.choices = self._get_valid_image_layers(
+            None
+        )
+        self.store_tomogram_widget.image_layer.choices = (
+            self._get_valid_image_layers(None)
         )
 
     def _on_click_freehand(self):
@@ -203,6 +259,65 @@ class Lasso3D(QWidget):
 
         # add the masked volume to the viewer
         self.viewer.add_image(masked_volume, name="masked_volume")
+
+    def _connected_components(
+        self,
+        mask_layer: napari.layers.Image,
+        remove_small_objects_size: int,
+    ):
+        if mask_layer is None:
+            return
+
+        mask = mask_layer.data
+
+        # get the connected components
+        components, num_components = label(mask)
+
+        # remove small objects
+        max_val = np.max(components)
+        i = 1
+        while i < max_val + 1:
+            if np.sum(components == i) < remove_small_objects_size:
+                components[components == i] = 0
+                components[components > i] -= 1
+                max_val -= 1
+            else:
+                i += 1
+
+        # add the modified mask to the viewer
+        self.viewer.add_image(components, name="connected_components")
+
+    def _display_connected_components(
+        self,
+        components_layer: napari.layers.Image,
+        component_number: int,
+    ):
+        if components_layer is None:
+            return
+
+        components_layer.contrast_limits = (
+            float(component_number) - 0.5,
+            float(component_number) + 0.5,
+        )
+
+        colors = np.zeros((256, 4))
+        colors[127] = [1, 0, 0, 1]
+        colors[128] = [1, 0, 0, 1]
+        custom_colormap = colormap.Colormap(colors)
+
+        components_layer.colormap = custom_colormap
+
+    def _store_tomogram(
+        self,
+        image_layer: napari.layers.Image,
+        store_component_number: int,
+        filename: str,
+    ):
+        if image_layer is None:
+            return
+        out_data = (image_layer.data == store_component_number) * 1.0
+        out_data = np.transpose(out_data, (2, 1, 0))
+        store_tomogram(filename, out_data)
 
     def _get_valid_points_layers(
         self, combo_box

@@ -31,7 +31,9 @@ dependencies = [
     "scikit-image",
     "scipy",
     "open3d",
-    "pyqt5"
+    "pyqt5",
+    "napari-mrcfile-reader",
+    "membrain-seg"
 ]
 
 [project.optional-dependencies]
