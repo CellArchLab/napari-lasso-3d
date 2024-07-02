@@ -81,6 +81,7 @@ def mask_via_extension(polygon_3d, tomo_shape):
     4. Do that for all slices along the z-axis.
     5. Fill holes which appeared during the process.
     """
+
     # rotate polygon to be flat
     polygon_3d_rotated, polygon_center, rot_mat = rotate_polygon_to_xy_plane(
         polygon_3d.copy()
@@ -91,14 +92,12 @@ def mask_via_extension(polygon_3d, tomo_shape):
     z_component = polygon_3d_rotated[0, 2]
 
     # create 2D mask
-    mask_2d, shift = create_2D_mask_from_polygon(
-        polygon_2d.copy(), tomo_shape[:2]
-    )
+    mask_2d, shift = create_2D_mask_from_polygon(polygon_2d.copy())
 
     # get 2D mask coordinates and shift to projected polygon center and add z-component
     mask_coords = np.argwhere(mask_2d)
     mask_coords = np.array(mask_coords, dtype=float)
-    mask_coords -= shift * 0.5
+    mask_coords -= shift
     mask_coords_orig = np.concatenate(
         [mask_coords, np.ones((mask_coords.shape[0], 1)) * z_component], axis=1
     )
@@ -143,5 +142,8 @@ def mask_via_extension(polygon_3d, tomo_shape):
         ]
         volume[cur_coords[:, 0], cur_coords[:, 1], cur_coords[:, 2]] = True
     # volume1 = binary_closing(volume1)
-    volume = cropped_closing(volume)
+    if np.sum(volume) > 0:
+        volume = cropped_closing(volume)
+    else:
+        print("WARNING: No mask created. Check the polygon.")
     return volume
