@@ -5,26 +5,22 @@ from skimage.draw import polygon2mask
 from lasso_3d.lasso_utils import (
     roll_or_concat,
     rotate_polygon_to_xy_plane,
-    shift_polygon,
 )
 
 
-def create_2D_mask_from_polygon(polygon_2d, tomo_shape):
+def create_2D_mask_from_polygon(polygon_2d):
     """
     Create a 2D mask from a 2D polygon.
     """
-    max_shape = np.max(tomo_shape)
-    polygon_2d, shift = shift_polygon(polygon_2d, max_shape)
-    mask = polygon2mask(np.array([max_shape * 2, max_shape * 2]), polygon_2d)
-    mask_cropped = mask[
-        max_shape
-        - tomo_shape[0] // 2 : tomo_shape[0]
-        + (max_shape - tomo_shape[0] // 2),
-        max_shape
-        - tomo_shape[1] // 2 : tomo_shape[1]
-        + (max_shape - tomo_shape[1] // 2),
-    ]
-    return mask_cropped, shift
+    min_val = np.min(polygon_2d)
+    max_val = np.max(polygon_2d)
+
+    polygon_2d += -min_val + 5
+
+    mask_shape = np.array([max_val - min_val + 10, max_val - min_val + 10])
+    mask_shape = np.round(mask_shape).astype(int)
+    mask = polygon2mask(mask_shape, polygon_2d)
+    return mask, -min_val + 5
 
 
 def extend_2D_mask_to_3D_volume(mask, tomo_shape):
