@@ -112,7 +112,7 @@ class Lasso3D(QWidget):
         self._layer_selection_widget_mask.mask_layer.choices = (
             self._get_valid_mask_layers(None)
         )
-        self._layer_selection_widget_connected_components.mask_layer.choices = self._get_valid_mask_layers(
+        self._layer_selection_widget_connected_components.mask_layer.choices = self._get_valid_image_layers(
             None
         )
         self._layer_selection_widget_display_connected_components.components_layer.choices = self._get_valid_image_layers(
