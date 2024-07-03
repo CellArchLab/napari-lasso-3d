@@ -54,7 +54,7 @@ class Lasso3D(QWidget):
         self.connected_components_box = QHBoxLayout()
         self._layer_selection_widget_connected_components = magicgui(
             self._connected_components,
-            mask_layer={"choices": self._get_valid_mask_layers},
+            mask_layer={"choices": self._get_valid_image_layers},
             remove_small_objects_size={"value": 100},
             call_button="Connected Components",
         )
@@ -269,6 +269,7 @@ class Lasso3D(QWidget):
             return
 
         mask = mask_layer.data
+        mask = mask > 0
 
         # get the connected components
         components, num_components = label(mask)
