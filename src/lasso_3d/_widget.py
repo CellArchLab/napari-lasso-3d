@@ -87,6 +87,21 @@ class Lasso3D(QWidget):
         )
         self.store_tomogram_box.addWidget(self.store_tomogram_widget.native)
 
+        self.store_all_components_box = QHBoxLayout()
+        self.store_all_components_widget = magicgui(
+            self._store_all_components,
+            image_layer={"choices": self._get_valid_image_layers},
+            foldername={
+                "widget_type": "FileEdit",
+                "mode": "d",
+                "label": "Folder Path",
+            },
+            call_button="Store All Components",
+        )
+        self.store_all_components_box.addWidget(
+            self.store_all_components_widget.native
+        )
+
         self.setLayout(QVBoxLayout())
         self.layout().addLayout(self.annotation_box)
         self.layout().addLayout(self.selection_box)
@@ -94,6 +109,7 @@ class Lasso3D(QWidget):
         self.layout().addLayout(self.connected_components_box)
         self.layout().addLayout(self.display_connected_components_box)
         self.layout().addLayout(self.store_tomogram_box)
+        self.layout().addLayout(self.store_all_components_box)
         # self.layout().addWidget(self._layer_selection_widget.native)
 
         viewer.layers.events.inserted.connect(self._on_layer_change)
@@ -119,6 +135,9 @@ class Lasso3D(QWidget):
             None
         )
         self.store_tomogram_widget.image_layer.choices = (
+            self._get_valid_image_layers(None)
+        )
+        self.store_all_components_widget.image_layer.choices = (
             self._get_valid_image_layers(None)
         )
 
@@ -319,6 +338,19 @@ class Lasso3D(QWidget):
         out_data = (image_layer.data == store_component_number) * 1.0
         out_data = np.transpose(out_data, (2, 1, 0))
         store_tomogram(filename, out_data)
+
+    def _store_all_components(
+        self,
+        image_layer: napari.layers.Image,
+        foldername: str,
+    ):
+        if image_layer is None:
+            return
+        out_data = image_layer.data
+        for i in range(1, np.max(out_data) + 1):
+            out_data_i = (out_data == i) * 1.0
+            out_data_i = np.transpose(out_data_i, (2, 1, 0))
+            store_tomogram(foldername + f"/component_{i}.mrc", out_data_i)
 
     def _get_valid_points_layers(
         self, combo_box
