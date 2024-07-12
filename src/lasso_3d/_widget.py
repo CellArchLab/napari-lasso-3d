@@ -250,7 +250,8 @@ class Lasso3D(QWidget):
         mask = mask_via_extension(points, volume_shape)
 
         # add the mask to the viewer
-        self.viewer.add_image(mask, name="mask")
+        mask_layer = self.viewer.add_image(mask, name="mask", opacity=0.4)
+        mask_layer.colormap = "green"
 
         return
 
