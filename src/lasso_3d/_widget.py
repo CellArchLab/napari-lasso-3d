@@ -134,7 +134,7 @@ class Lasso3D(QWidget):
             None
         )
         self.store_tomogram_widget.image_layer.choices = (
-            self._get_valid_image_layers(None)
+            self._get_valid_labels_layers(None)
         )
         self.store_all_components_widget.image_layer.choices = (
             self._get_valid_image_layers(None)
