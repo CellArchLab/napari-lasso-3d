@@ -6,7 +6,6 @@ from magicgui import magicgui
 from membrain_seg.segmentation.dataloading.data_utils import store_tomogram
 from napari.layers.shapes._shapes_constants import Mode
 from napari.layers.shapes._shapes_mouse_bindings import add_path_polygon_lasso
-from napari.utils.colormaps import colormap
 from qtpy.QtWidgets import (
     QHBoxLayout,
     QPushButton,
@@ -131,7 +130,7 @@ class Lasso3D(QWidget):
         self._layer_selection_widget_connected_components.mask_layer.choices = self._get_valid_image_layers(
             None
         )
-        self._layer_selection_widget_display_connected_components.components_layer.choices = self._get_valid_image_layers(
+        self._layer_selection_widget_display_connected_components.components_layer.choices = self._get_valid_labels_layers(
             None
         )
         self.store_tomogram_widget.image_layer.choices = (
@@ -304,28 +303,28 @@ class Lasso3D(QWidget):
             else:
                 i += 1
 
-        # add the modified mask to the viewer
-        self.viewer.add_image(components, name="connected_components")
+        # add as labels layer
+        self.viewer.add_labels(components, name="connected_components")
 
     def _display_connected_components(
         self,
-        components_layer: napari.layers.Image,
+        components_layer: napari.layers.Labels,
         component_number: int,
     ):
         if components_layer is None:
             return
 
-        components_layer.contrast_limits = (
-            float(component_number) - 0.5,
-            float(component_number) + 0.5,
-        )
+        max_label = components_layer.data.max()
+        colors = {i: (0, 0, 0, 0) for i in range(max_label + 1)}
+        colors[component_number] = (
+            1,
+            0,
+            0,
+            1,
+        )  # Set the label of interest to red with full opacity
 
-        colors = np.zeros((256, 4))
-        colors[127] = [1, 0, 0, 1]
-        colors[128] = [1, 0, 0, 1]
-        custom_colormap = colormap.Colormap(colors)
-
-        components_layer.colormap = custom_colormap
+        # Apply the custom colormap to the existing layer
+        components_layer.color = colors
 
     def _store_tomogram(
         self,
@@ -366,6 +365,15 @@ class Lasso3D(QWidget):
             layer
             for layer in self.viewer.layers
             if isinstance(layer, napari.layers.Image)
+        ]
+
+    def _get_valid_labels_layers(
+        self, combo_box
+    ) -> List[napari.layers.Labels]:
+        return [
+            layer
+            for layer in self.viewer.layers
+            if isinstance(layer, napari.layers.Labels)
         ]
 
     def _get_valid_mask_layers(self, combo_box) -> List[napari.layers.Image]:
