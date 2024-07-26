@@ -33,7 +33,8 @@ dependencies = [
     "open3d",
     "pyqt5",
     "napari-mrcfile-reader",
-    "membrain-seg"
+    "membrain-seg",
+    "dijkstra3d"
 ]
 
 [project.optional-dependencies]
