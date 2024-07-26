@@ -1,5 +1,6 @@
 from typing import List
 
+import dijkstra3d
 import napari
 import numpy as np
 from magicgui import magicgui
@@ -86,20 +87,37 @@ class Lasso3D(QWidget):
         )
         self.store_tomogram_box.addWidget(self.store_tomogram_widget.native)
 
-        self.store_all_components_box = QHBoxLayout()
-        self.store_all_components_widget = magicgui(
-            self._store_all_components,
-            image_layer={"choices": self._get_valid_image_layers},
-            foldername={
-                "widget_type": "FileEdit",
-                "mode": "d",
-                "label": "Folder Path",
+        # self.store_all_components_box = QHBoxLayout()
+        # self.store_all_components_widget = magicgui(
+        #     self._store_all_components,
+        #     image_layer={"choices": self._get_valid_image_layers},
+        #     foldername={
+        #         "widget_type": "FileEdit",
+        #         "mode": "d",
+        #         "label": "Folder Path",
+        #     },
+        #     call_button="Store All Components",
+        # )
+        # self.store_all_components_box.addWidget(
+        #     self.store_all_components_widget.native
+        # )
+
+        self.color_distances_box = QHBoxLayout()
+        color_point = QPushButton("Points")
+        color_point.clicked.connect(self._on_click_color_point)
+
+        self.color_distances_widget = magicgui(
+            self._color_distances,
+            image_layer={"choices": self._get_valid_mask_layers},
+            point={"value": [0, 0, 0], "label": "Point"},
+            connected_component_number={
+                "value": 1,
+                "label": "Component Number",
             },
-            call_button="Store All Components",
+            call_button="Color Distances",
         )
-        self.store_all_components_box.addWidget(
-            self.store_all_components_widget.native
-        )
+        self.color_distances_box.addWidget(color_point)
+        self.color_distances_box.addWidget(self.color_distances_widget.native)
 
         self.setLayout(QVBoxLayout())
         self.layout().addLayout(self.annotation_box)
@@ -108,8 +126,8 @@ class Lasso3D(QWidget):
         self.layout().addLayout(self.connected_components_box)
         self.layout().addLayout(self.display_connected_components_box)
         self.layout().addLayout(self.store_tomogram_box)
-        self.layout().addLayout(self.store_all_components_box)
-        # self.layout().addWidget(self._layer_selection_widget.native)
+        # self.layout().addLayout(self.store_all_components_box)
+        self.layout().addLayout(self.color_distances_box)
 
         viewer.layers.events.inserted.connect(self._on_layer_change)
         viewer.layers.events.removed.connect(self._on_layer_change)
@@ -136,9 +154,44 @@ class Lasso3D(QWidget):
         self.store_tomogram_widget.image_layer.choices = (
             self._get_valid_labels_layers(None)
         )
-        self.store_all_components_widget.image_layer.choices = (
-            self._get_valid_image_layers(None)
+        # self.store_all_components_widget.image_layer.choices = (
+        #     self._get_valid_labels_layers(None)
+        # )
+        self.color_distances_widget.image_layer.choices = (
+            self._get_valid_labels_layers(None)
         )
+
+    def _on_click_color_point(self):
+        """
+        This is to select a point in the foreground (i.e. non-zero voxels) in 3D.
+        """
+        self.viewer.mouse_drag_callbacks.append(self._on_mouse_click)
+
+    def _on_mouse_click(self, viewer, event):
+        coordinates = None
+        if (
+            event.position is not None
+            and self.color_distances_widget.image_layer.value is not None
+        ):
+            status = self.color_distances_widget.image_layer.value.get_status(
+                event.position,
+                view_direction=event.view_direction,
+                dims_displayed=event.dims_displayed,
+                world=True,
+            )
+            intersect_coords = status["coordinates"]
+            coordinates = np.array(
+                list(
+                    map(
+                        int,
+                        intersect_coords.split(":")[0].strip(" []").split(),
+                    )
+                )
+            )
+            value = int(intersect_coords.split(":")[1])
+            if value != 0:
+                self.color_distances_widget.point.value = coordinates
+                self.viewer.mouse_drag_callbacks.remove(self._on_mouse_click)
 
     def _on_click_freehand(self):
         """
@@ -254,6 +307,49 @@ class Lasso3D(QWidget):
         mask_layer.colormap = "green"
 
         return
+
+    def _color_distances(
+        self,
+        image_layer: napari.layers.Labels,
+        point: List[int],
+        connected_component_number: int,
+        # starting_point: List[int] = None,
+    ):
+        if image_layer is None:
+            return
+
+        # get the volume
+        foreground = image_layer.data == connected_component_number
+
+        if point is None:
+            point = np.argwhere(foreground)[0]
+
+        dist_field = dijkstra3d.euclidean_distance_field(
+            foreground,
+            source=[point],
+        )
+
+        dist_field[foreground == 0] = 0
+        dist_field[np.isinf(dist_field)] = (
+            0  # this should not happen, but just in case
+        )
+        dist_field = dist_field / np.max(dist_field)
+
+        max_range = 50
+        # discretize dist_field (i.e. make integers)
+        dist_field = np.round(dist_field * max_range).astype(int)
+
+        from matplotlib import pyplot as plt
+        from napari.utils import CyclicLabelColormap
+
+        cmap = plt.get_cmap("seismic")
+        colors = cmap(np.linspace(0, 1, max_range + 1))
+        colormap = CyclicLabelColormap(colors)
+
+        # add to viewer with rainbox color map
+        self.viewer.add_labels(
+            dist_field, name="distance field", colormap=colormap
+        )
 
     def _mask_volume(
         self,
