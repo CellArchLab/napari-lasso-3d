@@ -321,8 +321,11 @@ class Lasso3D(QWidget):
         # get the volume
         foreground = image_layer.data == connected_component_number
 
+        point = None
         if point is None:
-            point = np.argwhere(foreground)[0]
+            point = np.argwhere(foreground)[
+                np.random.randint(np.sum(foreground))
+            ]
 
         dist_field = dijkstra3d.euclidean_distance_field(
             foreground,
