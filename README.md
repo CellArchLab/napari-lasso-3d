@@ -16,13 +16,21 @@ This [napari] plugin was generated with [Cookiecutter] using [@napari]'s [cookie
 
 ## Lasso tool
 
-This repository currently contains 4 different methods for computing a 3D mask from a polygon:
+This repository allows to draw 3D lassos, generate masks from these, and then mask out the image.
+For instructions on how to use the plugin, please refer to the [Usage instructions](./docs/Usage.md).
 
+<div style="text-align: center;">
+<img src="https://private-user-images.githubusercontent.com/34575029/400214662-88851e09-6f10-4219-9b45-6f608c3e10b6.gif?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MzYwOTY5MDEsIm5iZiI6MTczNjA5NjYwMSwicGF0aCI6Ii8zNDU3NTAyOS80MDAyMTQ2NjItODg4NTFlMDktNmYxMC00MjE5LTliNDUtNmY2MDhjM2UxMGI2LmdpZj9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTAxMDUlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwMTA1VDE3MDMyMVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWY2ZTBmNjhkYjQ4Zjc3ZWZkMzlhYzdmODM3NTY3ZGNjYjAyZDk1MzI3ZTc1ZjY1NDJlYzgxYTRhZDcwNGJmOWUmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.rUYe0XfZLvXy_5iZCXqkKvP_SkZbXfKL4owh7ot8YeU" alt="lasso_gif" width="75%" />
+</div>
+
+How it works: A polygon is drawn and a mask is generated via:
 ### Mask via rotation
 Steps:
 1. Rotate and project polygon to 2D and create a pixel mask
 2. Create a 3D mask by stacking the pixel mask along z
 3. Rotate 3D mask s.t. it is aligned with the original polygon
+
+This performed more efficiently than the other methods:
 
 ### Mask via projection
 Steps:
@@ -45,14 +53,6 @@ Steps:
 2. Get indices of pixel mask and rotate them back to 3D space
 3. Do that for many pixel mask, varying the z-component --> will be moved into tomogram along the polygon normal
 4. Binary closing to get rid of holes from integer conversion
-
-<!--
-Don't miss the full getting started guide to set up your new package:
-https://github.com/napari/cookiecutter-napari-plugin#getting-started
-
-and review the napari docs for plugin developers:
-https://napari.org/stable/plugins/index.html
--->
 
 ## Installation
 

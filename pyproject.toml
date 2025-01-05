@@ -25,16 +25,14 @@ classifiers = [
 ]
 requires-python = ">=3.9"
 dependencies = [
-    "numpy",
     "magicgui",
-    "qtpy",
-    "scikit-image",
-    "scipy",
-    "open3d",
-    "pyqt5",
-    "napari-mrcfile-reader",
     "membrain-seg",
-    "dijkstra3d"
+    "napari-mrcfile-reader",
+    "numpy",
+    "pyqt5",
+    "qtpy",
+    "scipy",
+    "scikit-image",
 ]
 
 [project.optional-dependencies]
