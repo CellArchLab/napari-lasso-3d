@@ -20,7 +20,7 @@ This repository allows to draw 3D lassos, generate masks from these, and then ma
 For instructions on how to use the plugin, please refer to the [Usage instructions](./docs/Usage.md).
 
 <div style="text-align: center;">
-<img src="https://private-user-images.githubusercontent.com/34575029/400214662-88851e09-6f10-4219-9b45-6f608c3e10b6.gif?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MzYwOTY5MDEsIm5iZiI6MTczNjA5NjYwMSwicGF0aCI6Ii8zNDU3NTAyOS80MDAyMTQ2NjItODg4NTFlMDktNmYxMC00MjE5LTliNDUtNmY2MDhjM2UxMGI2LmdpZj9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTAxMDUlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwMTA1VDE3MDMyMVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWY2ZTBmNjhkYjQ4Zjc3ZWZkMzlhYzdmODM3NTY3ZGNjYjAyZDk1MzI3ZTc1ZjY1NDJlYzgxYTRhZDcwNGJmOWUmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.rUYe0XfZLvXy_5iZCXqkKvP_SkZbXfKL4owh7ot8YeU" alt="lasso_gif" width="75%" />
+<img src="https://github.com/user-attachments/assets/88851e09-6f10-4219-9b45-6f608c3e10b6" alt="lasso_gif" width="75%" />
 </div>
 
 How it works: A polygon is drawn and a mask is generated via:
